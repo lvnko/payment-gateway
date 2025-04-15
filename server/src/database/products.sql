@@ -3,5 +3,6 @@ CREATE TABLE `products` (
     `name` varchar(255) NOT NULL DEFAULT '',
     `amount` int UNSIGNED NOT NULL DEFAULT 0,
     `description` text,
-    `pre_order` int UNSIGNED NOT NULL DEFAULT 0
+    `pre_order` int UNSIGNED NOT NULL DEFAULT 0,
+    `price` int UNSIGNED NOT NULL DEFAULT 0,
 );

@@ -7,15 +7,23 @@ import logger from 'morgan';
 
 import indexRouter from './routes/index';
 import usersRouter from './routes/users';
+import { Knex } from 'knex';
+import { createDatabase } from './utils';
 
 class App {
   public app: express.Application;
+  private knexSql: Knex;
 
   constructor() {
     this.app = express();
     this.config();
+    this.knexSql = createDatabase();
     this.routerSetup();
     this.errorHandler();
+
+    this.knexSql.select('*').from('products').then((results)=>{
+      console.log('Results: ', results);
+    })
   }
 
   private config() {
