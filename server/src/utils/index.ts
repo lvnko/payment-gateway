@@ -16,3 +16,11 @@ export const createDatabase = () => {
         }
     })
 }
+
+export const isJson = (value: string) => {
+    try {
+        return Boolean(JSON.parse(value));
+    } catch (e) {
+        return false;
+    }
+}

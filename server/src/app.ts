@@ -9,15 +9,20 @@ import indexRouter from './routes/index';
 import usersRouter from './routes/users';
 import { Knex } from 'knex';
 import { createDatabase } from './utils';
+import { ModelContext, modelManager } from '@/manager/modelManager';
 
 class App {
   public app: express.Application;
   private knexSql: Knex;
+  private modelCtx: ModelContext;
 
   constructor() {
     this.app = express();
     this.config();
+
     this.knexSql = createDatabase();
+    this.modelCtx = modelManager({ knexSql: this.knexSql });
+
     this.routerSetup();
     this.errorHandler();
 

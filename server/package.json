@@ -7,6 +7,7 @@
     "build": "sh etc/build.sh"
   },
   "dependencies": {
+    "@types/lodash": "^4.17.16",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
     "dotenv": "^16.5.0",
@@ -14,6 +15,7 @@
     "express": "^4.21.2",
     "http-errors": "~1.6.3",
     "knex": "^3.1.0",
+    "lodash": "^4.17.21",
     "log4js": "latest",
     "module-alias": "^2.2.2",
     "morgan": "~1.9.1",

@@ -12,11 +12,11 @@ server $ npm run start
 ```
 
 ## 架構設計
-| 架構中所屬層次 | 技術工具/框架 | 角色 |
-|---|---|---|
-| Client | 未知 | Frontend renderer (前台網頁渲染) |
-| Backend | Node.js (Gen Express.js by Typescript) | Web service (專案核心部分) |
-| Database | MySQL on Linux (Contained by Docker, name: xue-mi) | 數據庫 |
+| 架構中所屬層次 | 技術工具/框架 | 角色 | MVC |
+|---|---|---|---|
+| Client | 未知 | Frontend renderer (前台網頁渲染) | View |
+| Backend | Node.js (Gen Express.js by Typescript) | Web service (專案核心部分) | Controller + Model |
+| Database | MySQL on Linux (Contained by Docker, name: xue-mi) | 數據庫 | Model 的根據 |
 
 ## Database 規劃
 ### 1. 產品表
