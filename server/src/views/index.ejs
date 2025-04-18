@@ -5,7 +5,35 @@
     <link rel='stylesheet' href='/stylesheets/style.css' />
   </head>
   <body>
-    <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>
+    <!-- <h1><%= title %></h1>
+    <p>Welcome to <%= title %></p> -->
+    <div id="app">
+      <!-- <h1>{{ title }}</h1>
+      <p>Welcome to {{ title }}</p>
+      <p>Current time: {{ currentTime }}</p>
+      <button @click="updateTime">Update Time</button> -->
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Amount</th>
+            <th>Price</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <!-- <td>{{ product.id }}</td>
+            <td>{{ product.name }}</td>
+            <td>{{ product.amount }}</td>
+            <td>{{ product.price }}</td>
+            <td>{{ product.description }}</td> -->
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="/javascripts/index.js"></script>
   </body>
 </html>

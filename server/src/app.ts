@@ -11,6 +11,7 @@ import { Knex } from 'knex';
 import { createDatabase } from './utils';
 import { ModelContext, modelManager } from '@/manager/modelManager';
 import { ControllerContext, controllerManager } from '@/manager/controllerManager';
+import { mountProductRouter } from './routes/product';
 
 class App {
   public app: express.Application;
@@ -29,9 +30,10 @@ class App {
     this.routerSetup();
     this.errorHandler();
 
-    this.knexSql.select('*').from('products').then((results)=>{
-      console.log('Results: ', results);
-    })
+    // Knex connection testing...
+    // this.knexSql.select('*').from('products').then((results)=>{
+    //   console.log('Results: ', results);
+    // })
   }
 
   private config() {
@@ -49,6 +51,7 @@ class App {
   private routerSetup() {
     this.app.use('/', indexRouter);
     this.app.use('/users', usersRouter);
+    this.app.use('/product', mountProductRouter({controllerCtx: this.controllerCtx}));
   }
 
   private errorHandler() {
