@@ -8,11 +8,7 @@
     <!-- <h1><%= title %></h1>
     <p>Welcome to <%= title %></p> -->
     <div id="app">
-      <!-- <h1>{{ title }}</h1>
-      <p>Welcome to {{ title }}</p>
-      <p>Current time: {{ currentTime }}</p>
-      <button @click="updateTime">Update Time</button> -->
-      <table>
+      <table v-bind:style="{width: '100%', textAlign: 'left'}">
         <thead>
           <tr>
             <th>ID</th>
@@ -20,20 +16,22 @@
             <th>Amount</th>
             <th>Price</th>
             <th>Description</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <!-- <td>{{ product.id }}</td>
+          <tr v-for="product in products" :key="product.id">
+            <td>{{ product.id }}</td>
             <td>{{ product.name }}</td>
             <td>{{ product.amount }}</td>
             <td>{{ product.price }}</td>
-            <td>{{ product.description }}</td> -->
+            <td>{{ product.description }}</td>
+            <td><input type="number" min="0" max="100" step="1" name=""/></td>
           </tr>
         </tbody>
       </table>
     </div>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/vue@2.6.14/dist/vue.min.js"></script>
     <script src="/javascripts/index.js"></script>
   </body>
 </html>
