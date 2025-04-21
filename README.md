@@ -39,5 +39,11 @@ server $ npm run start
 | status | enum | 訂單的狀態 | ENUM("WAITING", "SUCCESS", "FAILED", "CANCEL") |
 | content | json | 訂單內的商品內容，e.g.: [{商品ID, 商品數量, 商品價格}] (有別於一般 M2M 或 O2M 的數據庫設計，這裡使用 JSON 的方式儲存商品的相關資料) | DEFAULT NULL |
 
+## 訂單開立流程 -> 完結的流程
+1. 前端資料驗證
+2. 將商品的數量寫入 (預扣) ---> ID
+3. 利用 ID 去打第三方金流的 API 來產生第三方金流的訂單
+4. 當使用者繳完錢之後，第三方金流服務商會打我們提供的資訊 Update API
+
 ## 有用資源
 - TablePlus : 可以連接不同種類資料庫的工具
