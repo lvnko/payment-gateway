@@ -1,6 +1,6 @@
 import { isJson } from "@/utils";
 import { Knex } from "knex";
-import { camelCase, isEmpty, mapKeys, mapValues, snakeCase } from "lodash";
+import { camelCase, isEmpty, isObject, mapKeys, mapValues, snakeCase } from "lodash";
 
 // T 在這個階段，先不給他真正的型別：而是等到其他繼承他的Class要用的時候再傳入型別
 // database transaction，資料庫交易： => 保證多筆的 database 操作，能夠一起完成 或 是一起失敗
@@ -98,6 +98,7 @@ export abstract class Base<T> implements IBase<T> {
         const transform = mapValues(data, (value, key) => {
             
             if (['created_at', 'updated_at'].includes(key)) return new Date(value);
+            // check if a string is potentially a json
             if (isJson(value)) return JSON.parse(value);
 
             return value;
@@ -114,10 +115,10 @@ export abstract class Base<T> implements IBase<T> {
             // if (value instanceof Date) return value.toISOString();
             // if (typeof value === 'object') return JSON.stringify(value);
             if (['createdAt', 'updatedAt'].includes(key)) return new Date(value);
-            if (isJson(value)) return JSON.parse(value);
-
+            // check if value is an object
+            if (isObject(value)) return JSON.stringify(value);
+            
             return value;
-
         });
 
         return mapKeys(transform, (_value, key) => snakeCase(key));

@@ -1,6 +1,5 @@
 import { Knex, knex } from "knex";
-import { max } from "lodash";
-import { resolve } from "path";
+import { v4 as uuid } from 'uuid';
 
 enum ISOLATION_LEVEL {
     READ_UNCOMMITTED = 'READ UNCOMMITTED',
@@ -74,4 +73,16 @@ export const transactionHandler = async <T = any>(
     }
 
     return await execTransaction();
+}
+
+export const genUID = () => {
+    // UID format => timestamp : int(13) + string : varchar(7)
+    const alphabetMask = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+    const timestampStr = new Date().getTime().toString();
+    const code = timestampStr.split("")
+        .map((value, index)=> index % 2 ? value : alphabetMask[Number(index)])
+        .join("");
+    
+    const [uuidPartial] = uuid().split("-");
+    return `${code}${uuidPartial.substring(0, 7)}`;
 }

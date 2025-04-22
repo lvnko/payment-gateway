@@ -37,7 +37,9 @@ export interface Order {
     content: OrderContent[];
 }
 
-export interface IOrderModel extends IBase<Order> {}
+export interface IOrderModel extends IBase<Order> {
+    create(data: Order, trx?: Knex.Transaction): Promise<Order | null>;
+}
 
 export class OrderModel extends Base<Order> implements IOrderModel {
 

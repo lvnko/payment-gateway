@@ -43,6 +43,16 @@ export class ProductModel extends Base<Product> implements IProductModel {
         let queryBuilder = this.knexSql(this.tableName)
             .where({ id: product.id })
             .where(this.schema.amount, ">=", product.amount)
-            .update();
+            .whereRaw(`${this.schema.amount} - ${this.schema.preOrder} >= ?`, [product.amount])
+            .update(
+                this.schema.preOrder,
+                this.knexSql.raw(`?? + ?`, [this.schema.preOrder, product.amount])
+            );
+
+        if (trx) queryBuilder = queryBuilder.transacting(trx);
+        
+        const result = await queryBuilder;
+
+        return !!result;
     }
 }

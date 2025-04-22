@@ -1,10 +1,11 @@
-import { IOrderModel, OrderContent, PaymentProvider, PaymentWay } from "@/model/order";
+import { IOrderModel, OrderContent, OrderStatus, PaymentProvider, PaymentWay } from "@/model/order";
 import { IProductModel } from "@/model/products";
 import { NextFunction, Request, Response } from "express";
 import { Knex } from "knex";
-import { isEmpty } from "lodash";
+import { isEmpty, pick } from "lodash";
 import { body, ValidationChain, validationResult } from "express-validator";
-import { transactionHandler } from "@/utils";
+import { genUID, transactionHandler } from "@/utils";
+import { stat } from "fs";
 
 interface OrderControllerProps {
     knexSql: Knex;
@@ -93,6 +94,31 @@ export class OrderController implements IOrderController {
         try {
             await transactionHandler(this.knexSql, async (trx: Knex.Transaction) => {
                 
+                const results = await Promise.all(
+                    content.map(async product => await this.productModel.preSell({
+                        id: product.productId,
+                        ...pick(product, ['amount', 'price'])
+                    }, trx))
+                );
+
+                if (results.some(result => !result))
+                    throw new Error("Product not found or insufficient stock.");
+
+                const totalPrice = content.reduce((accm, product)=> accm + (product.price * product.amount), 0);
+                const uid = genUID();
+
+                await this.orderModel.create({
+                    id: uid,
+                    total: totalPrice,
+                    createdAt: new Date(),
+                    updatedAt:  new Date(),
+                    paymentProvider,
+                    paymentWay,
+                    status: OrderStatus.WAITING,
+                    content
+                }, trx);
+
+                res.json({ status: "success", data: { id: uid } });
             });
         } catch (error) {
             console.error("Transaction error: ", error);
@@ -112,8 +138,6 @@ export class OrderController implements IOrderController {
         //     content
         // });
         // res.json(result);
-
-        res.json({ status: "success" });
     }
 
     public updateAmount: IOrderController['updateAmount'] = async (_req, _res, _next) => {
