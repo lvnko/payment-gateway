@@ -10,7 +10,9 @@ export interface Product {
     price: number;
 }
 
-export interface IProductModel extends IBase<Product> {}
+export interface IProductModel extends IBase<Product> {
+    preSell(product: Pick<Product, 'id' | 'amount' | 'price'>, trx?: Knex.Transaction): Promise<boolean>;
+}
 
 export class ProductModel extends Base<Product> implements IProductModel {
 
@@ -32,5 +34,15 @@ export class ProductModel extends Base<Product> implements IProductModel {
 
     static createModel = ({ knexSql, tableName }: { knexSql: Knex; tableName?: string }) => {
         return new ProductModel({ knexSql });
+    }
+
+    public preSell = async (
+        product: Pick<Product, 'id' | 'amount' | 'price'>,
+        trx: Knex.Transaction
+    ): Promise<boolean> => {
+        let queryBuilder = this.knexSql(this.tableName)
+            .where({ id: product.id })
+            .where(this.schema.amount, ">=", product.amount)
+            .update();
     }
 }

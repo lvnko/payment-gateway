@@ -1,4 +1,13 @@
-import { knex } from "knex"
+import { Knex, knex } from "knex";
+import { max } from "lodash";
+import { resolve } from "path";
+
+enum ISOLATION_LEVEL {
+    READ_UNCOMMITTED = 'READ UNCOMMITTED',
+    READ_COMMITTED = 'READ COMMITTED',
+    REPEATABLE_READ = 'REPEATABLE READ',
+    SERIALIZABLE = 'SERIALIZABLE'
+}
 
 export const createDatabase = () => {
     return knex({
@@ -23,4 +32,46 @@ export const isJson = (value: string) => {
     } catch (e) {
         return false;
     }
+}
+
+function sleep(maxBackOff: number): Promise<number> {
+    return new Promise((resolve) => setTimeout(() => resolve(1), maxBackOff));
+}
+
+export const transactionHandler = async <T = any>(
+    knex: Knex,
+    callback: (trx: Knex.Transaction) => Promise<T>,
+    options: {
+        retryTimes?: number;
+        maxBackOff?: number;
+        isolation? : ISOLATION_LEVEL;
+    } = {}
+) => {
+    const { retryTimes = 100, maxBackOff = 1000, isolation } = options;
+    let attempts = 0;
+
+    const execTransaction = async (): Promise<T> => {
+        const trx = await knex.transaction();
+
+        try {
+            if (isolation) {
+                await trx.raw(`SET TRANSACTION ISOLATION LEVEL ${isolation}`);
+            }
+
+            const result = await callback(trx);
+            await trx.commit();
+            return result;
+
+        } catch (error: any) {
+            await trx.rollback();
+            if (error.code !== '1205') throw error;
+            if (attempts >= retryTimes) throw Error('Transaction failed after maximum retries');
+            attempts++;
+
+            await sleep(maxBackOff);
+            return execTransaction();
+        }
+    }
+
+    return await execTransaction();
 }
