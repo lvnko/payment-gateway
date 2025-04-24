@@ -51,7 +51,7 @@ export abstract class Base<T> implements IBase<T> {
         if (trx) sqlBuilder = sqlBuilder.transacting(trx);
         const result = await sqlBuilder;
         
-        return isEmpty(result) ? null : this.DBData2DataObject(result) as T[];
+        return isEmpty(result) ? null : result.map(this.DBData2DataObject) as T[];
     }
 
     public findOne = async (id: any, trx?: Knex.Transaction) => {
@@ -93,7 +93,7 @@ export abstract class Base<T> implements IBase<T> {
         return;
     }
 
-    private DBData2DataObject = (data: any) => {
+    protected DBData2DataObject = (data: any) => {
         
         const transform = mapValues(data, (value, key) => {
             
@@ -108,7 +108,7 @@ export abstract class Base<T> implements IBase<T> {
         return mapKeys(transform, (_value, key) => camelCase(key));
     }
 
-    private DataObject2DBData = (data: any) => {
+    protected DataObject2DBData = (data: any) => {
 
         const transform = mapValues(data, (value, key) => {
 

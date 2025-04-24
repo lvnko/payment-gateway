@@ -1,17 +1,19 @@
 import { Knex } from "knex";
 import { Base, IBase } from "./base";
+import { isEmpty } from "lodash";
 
 export interface Product {
     id: number;
     name: string;
     amount: number;
     description: string;
-    pre_order: number;
+    preOrder: number;
     price: number;
 }
 
 export interface IProductModel extends IBase<Product> {
     preSell(product: Pick<Product, 'id' | 'amount' | 'price'>, trx?: Knex.Transaction): Promise<boolean>;
+    findByIds(ids: number[], trx?: Knex.Transaction): Promise<Product[] | null>;
 }
 
 export class ProductModel extends Base<Product> implements IProductModel {
@@ -54,5 +56,17 @@ export class ProductModel extends Base<Product> implements IProductModel {
         const result = await queryBuilder;
 
         return !!result;
+    }
+
+    public findByIds: IProductModel["findByIds"] = async (ids, trx) => {
+
+        let queryBuilder = this.knexSql(this.tableName).whereIn('id', ids);
+
+        if (trx) queryBuilder = queryBuilder.transacting(trx);
+        
+        const result = await queryBuilder;
+        if (isEmpty(result)) return null;
+
+        return result.map(this.DBData2DataObject) as Product[];
     }
 }

@@ -6,6 +6,7 @@ import { isEmpty, pick } from "lodash";
 import { body, ValidationChain, validationResult } from "express-validator";
 import { genUID, transactionHandler } from "@/utils";
 import { stat } from "fs";
+import { paymentDispatcher } from "@/dispatcher";
 
 interface OrderControllerProps {
     knexSql: Knex;
@@ -118,15 +119,33 @@ export class OrderController implements IOrderController {
                     content
                 }, trx);
 
-                res.json({ status: "success", data: { id: uid } });
+                const products = await this.productModel.findByIds(content.map(item => item.productId)) || [];
+                const payloadDetails = content.map(({ productId, price, amount }) => ({
+                    name: products.find(p => p.id === productId)?.name || "",
+                    price: price,
+                    amount: amount
+                }));
+
+                // 第 4 步：金流 API 的串接 (ECPAY / Paypal)
+                const result = await paymentDispatcher({
+                    paymentProvider,
+                    paymentWay,
+                    payload: {
+                        billId: uid,
+                        totalPrice,
+                        desc: `Create order of #bill: ${uid} with ${content.map(item => item.productId).join(",")}`,
+                        details: payloadDetails,
+                        returnURL: `${process.env.END_POINT}/order/udpate`
+                    }
+                });
+
+                res.send(result);
             });
         } catch (error) {
             console.error("Transaction error: ", error);
             res.status(500).json({ error });
             throw error;
         }
-
-        // 第 4 步：金流 API 的串接 (ECPAY / Paypal)
         // 第 5 步：回覆 database createOrder 的執行結果給前端
 
         // const { total, paymentProvider, paymentWay, status, content } = req.body;
