@@ -14,6 +14,7 @@ export interface Product {
 export interface IProductModel extends IBase<Product> {
     preSell(product: Pick<Product, 'id' | 'amount' | 'price'>, trx?: Knex.Transaction): Promise<boolean>;
     findByIds(ids: number[], trx?: Knex.Transaction): Promise<Product[] | null>;
+    updateAmount(product: Pick<Product, 'id' | 'amount' | 'price'>, trx?: Knex.Transaction): Promise<boolean>;
 }
 
 export class ProductModel extends Base<Product> implements IProductModel {
@@ -68,5 +69,28 @@ export class ProductModel extends Base<Product> implements IProductModel {
         if (isEmpty(result)) return null;
 
         return result.map(this.DBData2DataObject) as Product[];
+    }
+
+    public updateAmount: IProductModel["updateAmount"] = async (product, trx) => {
+
+        let queryBuilder = this.knexSql(this.tableName)
+            .where('id', product.id)
+            .where(this.schema.preOrder, ">", 0)
+            .where(this.schema.amount, ">=", product.amount)
+            .whereRaw(`${this.schema.amount} - ${this.schema.preOrder} >= ?`, [product.amount])
+            .update(
+                this.schema.amount,
+                this.knexSql.raw(`?? - ?`, [this.schema.amount, product.amount])
+            )
+            .update(
+                this.schema.preOrder,
+                this.knexSql.raw(`?? - ?`, [this.schema.preOrder, product.amount])
+            );
+
+        if (trx) queryBuilder = queryBuilder.transacting(trx);
+    
+        const result = await queryBuilder;
+
+        return !!result;
     }
 }

@@ -4,6 +4,7 @@ var vue = new Vue({
     el: '#app',
     data() {
         return {
+            paymentPlatform: "",
             buyItems: {}, // : Record<string, number> (e.g. { "id": "amount", ... })
             products: []
         }
@@ -49,7 +50,13 @@ var vue = new Vue({
                 paymentWay: "CVS",
                 content: items
             });
-            console.log("🚀 ~ index.js:51 ~ ECPay ~ result:", result)
+            console.log("🚀 ~ index.js:51 ~ ECPay ~ result:", result);
+            const { data: html } = result;
+            this.paymentPlatform = html;
+            console.log("🚀 ~ index.js:56 ~ ECPay ~ this.paymentPlatform:", this.paymentPlatform);
+            this.$nextTick(() => {
+                document.getElementById("_form_aiochk").submit();
+            });
         }
     }
 });

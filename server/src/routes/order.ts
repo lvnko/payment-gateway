@@ -8,7 +8,7 @@ export const mountOrderRouter = ({
 }) => {
 
     let router = express.Router();
-    const { createOrderValidator, createOrder } = controllerCtx.orderController
+    const { createOrderValidator, createOrder, updateOrder } = controllerCtx.orderController
 
     router.post(
         '/create',
@@ -18,6 +18,12 @@ export const mountOrderRouter = ({
         // controller create order 正式的內容
         createOrder
     );
+
+    router.post(
+        '/update',
+        // controller 接收 Payment Gateway 的 Post
+        updateOrder
+    )
 
     return router;
     

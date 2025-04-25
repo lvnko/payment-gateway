@@ -94,7 +94,6 @@ export class ECPayAdapter implements IECPayAdapter {
             invParmas,
             clientRedirectUrl
         );
-        console.log("🚀 ~ index.ts:97 ~ ECPayAdapter ~ html:", html)
         return html;
     }
 }

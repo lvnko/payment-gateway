@@ -31,6 +31,8 @@ class App {
       modelCtx: this.modelCtx
     });
 
+    
+
     this.routerSetup();
     this.errorHandler();
 
@@ -53,6 +55,17 @@ class App {
   }
 
   private routerSetup() {
+    if (Boolean(process.env.DEBUG_MODE)) { // To view the logging of all request when DEBUG_MODE is on.
+      this.app.use((req, res, next) => {
+        console.log('🚀 ~ app.ts:60 ~ App ~ this.app.use ~ Request:', {
+          method: req.method,
+          url: req.originalUrl,
+          headers: req.headers,
+          body: req.body,
+        });
+        next();
+      });
+    }
     this.app.use('/', indexRouter);
     this.app.use('/users', usersRouter);
     this.app.use('/product', mountProductRouter({controllerCtx: this.controllerCtx}));

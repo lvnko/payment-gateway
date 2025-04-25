@@ -27,7 +27,7 @@ export interface IOrderController {
         _next: NextFunction
     ): void;
     createOrderValidator(): ValidationChain[];
-    updateAmount(
+    updateOrder(
         req: Request<any, any, any, any>,
         res: Response,
         _next: NextFunction
@@ -135,11 +135,11 @@ export class OrderController implements IOrderController {
                         totalPrice,
                         desc: `Create order of #bill: ${uid} with ${content.map(item => item.productId).join(",")}`,
                         details: payloadDetails,
-                        returnURL: `${process.env.END_POINT}/order/udpate`
+                        returnURL: `${process.env.END_POINT}/order/update`
                     }
                 });
 
-                res.send(result);
+                res.json({ status: "success", data: result });
             });
         } catch (error) {
             console.error("Transaction error: ", error);
@@ -159,7 +159,59 @@ export class OrderController implements IOrderController {
         // res.json(result);
     }
 
-    public updateAmount: IOrderController['updateAmount'] = async (_req, _res, _next) => {
-        // TODO: ...
+    public updateOrder: IOrderController['updateOrder'] = async (req, res, _next) => {
+        console.log("🚀 ~ orderController.ts:163 ~ OrderController ~ updateAmount:IOrderController['updateAmount']= ~ req.body:", req.body);
+        
+        const failedResponse = () => {
+            return res.status(500).json("0|FAILED");
+        }
+
+        let merchantTradeNo = '';
+        let tradeDate = '';
+
+        if ("RtnCode" in req.body && "MerchantTradeNo" in req.body) {
+            
+            const { MerchantTradeNo, RtnCode, TradeDate } = req.body;
+            
+            if (RtnCode !== '1')
+                return failedResponse();
+            
+            merchantTradeNo = MerchantTradeNo;
+            tradeDate = TradeDate;
+        }
+
+        try {
+            
+            // #1 : 從 orders 中找出訂單
+            const order = await this.orderModel.findOne(merchantTradeNo);
+            if (
+                isEmpty(order) ||
+                order?.status !== OrderStatus.WAITING
+            ) return failedResponse();
+
+            // #2 : 更新相關 products 的庫存量
+            const results = await Promise.all(
+                order!.content.map(async (product) => await this.productModel.updateAmount({
+                    id: product.productId,
+                    ...pick(product, ['amount', 'price'])
+                }))
+            );
+            if (results.some(result => !result)) return failedResponse();
+
+            // #3 : 更新 order 狀態
+            await this.orderModel.update(
+                merchantTradeNo,
+                {
+                    status: OrderStatus.SUCCESS,
+                    updatedAt: new Date(tradeDate)
+                }
+            );
+
+            res.status(200).send("1|OK");
+
+        } catch (error) {
+            console.log("🚀 ~ orderController.ts:182 ~ OrderController ~ updateOrder:IOrderController['updateOrder']= ~ error:", error);
+            return failedResponse();
+        }
     }
 }
