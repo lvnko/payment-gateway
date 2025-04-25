@@ -51,4 +51,5 @@ server $ npm run start
     - API技術文件 [[連結](https://developers.ecpay.com.tw)]
     - 測試環境資料 [[連結](https://developers.ecpay.com.tw/?p=2856)]
     - AIO Node.js 版的 SDK 及範例 [[連結](https://github.com/ECPay/ECPayAIO_Node.js/tree/master)]
+    - 廠商管理後台 (測試版) [[連結](https://vendor-stage.ecpay.com.tw/User/LogOn_Step1)]
 - ngrok : 將本機服務安全地暴露到網際網路 [[連結](https://ngrok.com)]
