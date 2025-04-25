@@ -139,6 +139,7 @@ export class OrderController implements IOrderController {
                     }
                 });
 
+                // 第 5 步：回覆 database createOrder 的執行結果給前端
                 res.json({ status: "success", data: result });
             });
         } catch (error) {
@@ -146,17 +147,6 @@ export class OrderController implements IOrderController {
             res.status(500).json({ error });
             throw error;
         }
-        // 第 5 步：回覆 database createOrder 的執行結果給前端
-
-        // const { total, paymentProvider, paymentWay, status, content } = req.body;
-        // const result = await this.orderModel.create({
-        //     total,
-        //     paymentProvider,
-        //     paymentWay,
-        //     status,
-        //     content
-        // });
-        // res.json(result);
     }
 
     public updateOrder: IOrderController['updateOrder'] = async (req, res, _next) => {
@@ -166,6 +156,10 @@ export class OrderController implements IOrderController {
             return res.status(500).json("0|FAILED");
         }
 
+        // 此 method 主在製造一個 update order webhook 給 payment gateway provider
+        // 當 payment gateway provider 確認支付結果為成功後，便發出通知給商戶後台
+        // 這時後台便會處理相關的資料更新，並給 payment gateway provider 一個回覆
+        
         let merchantTradeNo = '';
         let tradeDate = '';
 
@@ -181,7 +175,7 @@ export class OrderController implements IOrderController {
         }
 
         try {
-            
+
             // #1 : 從 orders 中找出訂單
             const order = await this.orderModel.findOne(merchantTradeNo);
             if (
