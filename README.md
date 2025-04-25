@@ -47,3 +47,8 @@ server $ npm run start
 
 ## 有用資源
 - TablePlus : 可以連接不同種類資料庫的工具
+- 綠界開發資源：
+    - API技術文件 [[連結](https://developers.ecpay.com.tw)]
+    - 測試環境資料 [[連結](https://developers.ecpay.com.tw/?p=2856)]
+    - AIO Node.js 版的 SDK 及範例 [[連結](https://github.com/ECPay/ECPayAIO_Node.js/tree/master)]
+- ngrok : 將本機服務安全地暴露到網際網路 [[連結](https://ngrok.com)]
