@@ -63,4 +63,4 @@ $ ngrok http --url={{path_to_expose}} 30000
     - Developer 入口 [[連結](https://developer.paypal.com/home/)]
     - Javascript SDK 參考範例 [[連結](https://developer.paypal.com/sdk/js/reference)]
     - Checkout 串接標準範例 [[連結](https://developer.paypal.com/studio/checkout/standard/integrate)]
-- ngrok : 將本機服務安全地暴露到網際網路 [[連結](https://ngrok.com)]
+- ngrok : 將本機服務安全地發布到網際網路上 (以引流轉送的方法) [[連結](https://ngrok.com)]
