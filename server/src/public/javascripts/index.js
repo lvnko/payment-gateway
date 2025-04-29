@@ -13,6 +13,26 @@ var vue = new Vue({
         this.products = await fetch(`${serverDomain}/product/list`).then(res => res.json());
         console.log('file : javascripts/index.js : this.products => ', this.products);
         console.log('Object.keys(this.products) => ', Object.keys(this.products));
+        
+        paypal.Buttons({
+            createOrder: async (data, actions) => {
+                // 串接 Express.js server 的 handler.
+                const items = this.getItemDetailByBuyItems();
+                const result = await this.sendPayment(`${serverDomain}/order/create`, {
+                    paymentProvider: "PAYPAL",
+                    paymentWay: "PAYPAL",
+                    content: items
+                });
+                console.log("🚀 ~ index.js:26 ~ createOrder: ~ result:", result);
+                // '06K661981V283114C' // 來自教程範例 id
+                // "98S96604KF200093K" // 親自試驗所得 id
+                return result.data;
+            },
+            onApprove: (data, actions) => {
+                console.log("🚀 ~ index.js:22 ~ mounted ~ data:", data)
+                return actions.order.capture();
+            }
+        }).render('#paypal-button-container');
     },
     methods: {
         getItemDetailByBuyItems() {

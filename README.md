@@ -11,6 +11,13 @@ payment-gateway $ cd server
 server $ npm run start
 ```
 
+3. 啟動 ngrok 代為公開本地 API 端點
+```shell
+$ ngrok http --url={{path_to_expose}} 30000
+```
+
+
+
 ## 架構設計
 | 架構中所屬層次 | 技術工具/框架 | 角色 | MVC |
 |---|---|---|---|
@@ -52,4 +59,6 @@ server $ npm run start
     - 測試環境資料 [[連結](https://developers.ecpay.com.tw/?p=2856)]
     - AIO Node.js 版的 SDK 及範例 [[連結](https://github.com/ECPay/ECPayAIO_Node.js/tree/master)]
     - 廠商管理後台 (測試版) [[連結](https://vendor-stage.ecpay.com.tw/User/LogOn_Step1)]
+- Paypal開發資源：
+    - Developer 入口 [[連結](https://developer.paypal.com/home/)]
 - ngrok : 將本機服務安全地暴露到網際網路 [[連結](https://ngrok.com)]

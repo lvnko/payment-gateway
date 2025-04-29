@@ -1,4 +1,5 @@
 import { ECPayAdapter } from "@/adapters/ecpay";
+import { PaypalAdapter } from "@/adapters/paypal";
 import { PaymentProvider, PaymentWay } from "@/model/order";
 import dayjs from "dayjs";
 
@@ -6,6 +7,7 @@ export interface IOrderDetail {
     name: string;
     price: number;
     amount: number;
+    desc: string;
 }
 
 export interface IPaymentPayload {
@@ -43,5 +45,12 @@ export const paymentDispatcher = async ({
         } else throw new Error("Unsupported payment way.");
     } else if (paymentProvider === PaymentProvider.PAYPAL) {
         // TODO: Implement PayPal payment
+        const paypal = new PaypalAdapter();
+        const id = await paypal.createOrder({
+            billId: payload.billId,
+            totalPrice: payload.totalPrice,
+            details: payload.details
+        });
+        return id;
     } else throw new Error("Unsupported payment provider.");
 }

@@ -120,11 +120,18 @@ export class OrderController implements IOrderController {
                 }, trx);
 
                 const products = await this.productModel.findByIds(content.map(item => item.productId)) || [];
-                const payloadDetails = content.map(({ productId, price, amount }) => ({
-                    name: products.find(p => p.id === productId)?.name || "",
-                    price: price,
-                    amount: amount
-                }));
+                const payloadDetails = content.map((item) => {
+                    
+                    const { productId, price, amount } = item;
+                    const product = products.find(p => p.id === productId);
+                    
+                    return {
+                        name: product?.name || "",
+                        price: price,
+                        amount: amount,
+                        desc: product?.description || ""
+                    };
+                });
 
                 // 第 4 步：金流 API 的串接 (ECPAY / Paypal)
                 const result = await paymentDispatcher({
@@ -138,6 +145,7 @@ export class OrderController implements IOrderController {
                         returnURL: `${process.env.END_POINT}/order/update`
                     }
                 });
+                console.log("🚀 ~ orderController.ts:148 ~ OrderController ~ awaittransactionHandler ~ paymentDispatcher ~ result:", result)
 
                 // 第 5 步：回覆 database createOrder 的執行結果給前端
                 res.json({ status: "success", data: result });
@@ -152,8 +160,9 @@ export class OrderController implements IOrderController {
     public updateOrder: IOrderController['updateOrder'] = async (req, res, _next) => {
         console.log("🚀 ~ orderController.ts:163 ~ OrderController ~ updateAmount:IOrderController['updateAmount']= ~ req.body:", req.body);
         
-        const failedResponse = () => {
-            return res.status(500).json("0|FAILED");
+        const failedResponse = (responseInJSON = true) => {
+            return responseInJSON && responseInJSON === true ?
+                res.status(500).json("0|FAILED") : res.status(500).send(500);
         }
 
         // 此 method 主在製造一個 update order webhook 給 payment gateway provider
@@ -164,7 +173,7 @@ export class OrderController implements IOrderController {
         let tradeDate = '';
 
         if ("RtnCode" in req.body && "MerchantTradeNo" in req.body) {
-            
+            // ECPay
             const { MerchantTradeNo, RtnCode, TradeDate } = req.body;
             
             if (RtnCode !== '1')
@@ -172,6 +181,14 @@ export class OrderController implements IOrderController {
             
             merchantTradeNo = MerchantTradeNo;
             tradeDate = TradeDate;
+        } else if ("resource" in req.body && "resource_type" in req.body) {
+            // Paypal
+            const { custom_id, update_time, status } = req.body.resource;
+            if ( status !== 'COMPLETED')
+                return failedResponse(false);
+            
+            merchantTradeNo = custom_id;
+            tradeDate = update_time;
         }
 
         try {
